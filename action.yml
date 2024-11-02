@@ -1,15 +1,24 @@
 name: "Upgrade Dependencies Action"
 description: "Composite action to upgrade dependencies, create a diff, and open a pull request"
+author: "Philip M. Gollucci"
+inputs:
+  gh_token:
+    description: "GitHub Token"
+    required: true
 runs:
   using: "composite"
   steps:
     - name: Checkout code
       uses: actions/checkout@v4.2.2
+      with:
+        fetch-depth: 0
+        ref: main
     - name: Install Node.js
       shell: bash
       run: |
         curl -fsSL https://nodejs.org/dist/v22.11.0/node-v22.11.0-linux-x64.tar.xz -o node-v22.11.0-linux-x64.tar.xz
         sudo tar -xJf node-v22.11.0-linux-x64.tar.xz -C /usr/local
+        rm -f node-v22.11.0-linux-x64.tar.xz
         echo "/usr/local/node-v22.11.0-linux-x64/bin" >> $GITHUB_PATH
     - name: Restore NPM node_modules cache
       uses: actions/cache/restore@v4.1.2
@@ -38,11 +47,9 @@ runs:
         yarn --version
         corepack --version
         echo $PATH
-    # - name: Install node_modules
-    #   shell: bash
-    #   run: |
-    #     yarn install
-    #     yarn explain peer-requirements
+    - name: Upgrade Dependencies
+      shell: bash
+      run: yarn install
     - name: Cache NPM dependencies
       uses: actions/cache@v4.1.2
       with:
@@ -54,7 +61,7 @@ runs:
       id: create_pr
       uses: peter-evans/create-pull-request@v7.0.5
       with:
-        token: ${{ secrets.P6_PGOLLUCCI_GH_TOKEN }}
+        token: ${{ inputs.gh_token }}
         commit-message: |
           chore(deps): upgrade dependencies
         branch: github-actions/upgrade-main
