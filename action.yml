@@ -1,5 +1,5 @@
-name: "Upgrade Dependencies Action"
-description: "Composite action to upgrade dependencies, create a diff, and open a pull request"
+name: "P6 GHA: Upgrade Dependencies for a CDK Construct"
+description: "P6 GHA: Upgrade Dependencies for a CDK Construct"
 author: "Philip M. Gollucci"
 inputs:
   gh_token:
