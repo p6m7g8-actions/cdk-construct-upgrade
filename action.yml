@@ -14,7 +14,7 @@ runs:
     # Checkout the repository
     # -------------------------
     - name: Checkout main branch
-      uses: actions/checkout@v5
+      uses: actions/checkout@v5.0.0
       with:
         fetch-depth: 0
         ref: main
@@ -39,18 +39,6 @@ runs:
         echo "EOF" >> "$GITHUB_ENV"
 
     # -------------------------
-    # Prime Git authentication for PR (fixes remote prune)
-    # -------------------------
-    - name: Prime Git HTTPS credentials
-      shell: bash
-      run: |
-        auth="$(printf "x-access-token:${{ inputs.gh_token }}" | base64 | tr -d '\n')"
-        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth}"
-        git remote set-url origin "https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}.git"
-        git config user.name "github-actions"
-        git config user.email "github-actions@github.com"
-
-    # -------------------------
     # Create or update the PR
     # -------------------------
     - name: Create Pull Request
@@ -58,7 +46,7 @@ runs:
       uses: peter-evans/create-pull-request@v7.0.8
       with:
         token: ${{ inputs.gh_token }}
-        branch-token: ${{ inputs.gh_token }} # ensures git push/prune works
+        branch-token: ${{ inputs.gh_token }}
         branch: github-actions/upgrade-main
         commit-message: "chore(deps): upgrade dependencies"
         title: "chore(deps): upgrade dependencies"
