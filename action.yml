@@ -15,7 +15,7 @@ runs:
         persist-credentials: false
         ref: main
     - name: Configure Git credentials
-      run: git remote set-url origin https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}.git
+      run: git remote set-url origin https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}
       shell: bash
     - name: Setup Node
       uses: p6m7g8-actions/node-yarn-setup@main
