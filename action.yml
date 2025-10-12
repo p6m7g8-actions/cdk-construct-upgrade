@@ -14,9 +14,13 @@ runs:
         fetch-depth: 0
         persist-credentials: false
         ref: main
-    - name: Configure Git credentials
-      run: git remote set-url origin https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}
+        token: ${{ inputs.gh_token }}
+    - name: Fix remote for push authentication
       shell: bash
+      run: |
+        git remote set-url origin "https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}.git"
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
     - name: Setup Node
       uses: p6m7g8-actions/node-yarn-setup@main
     - name: Upgrade Dependencies
