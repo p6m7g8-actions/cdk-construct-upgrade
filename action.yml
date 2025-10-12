@@ -23,7 +23,7 @@ runs:
       uses: peter-evans/create-pull-request@v7.0.8
       with:
         token: ${{ inputs.gh_token }}
-	prune: false
+        prune: false
         commit-message: |
           chore(deps): upgrade dependencies
         branch: github-actions/upgrade-main
