@@ -33,10 +33,15 @@ runs:
       shell: bash
       run: |
         yarn up '*'
+
+    - name: Check for changes
+      shell: bash
+      run: |
         git diff > diff.txt
         echo "diff<<EOF" >> "$GITHUB_ENV"
         cat diff.txt >> "$GITHUB_ENV"
         echo "EOF" >> "$GITHUB_ENV"
+        rm -f diff.txt
 
     # -------------------------
     # Create or update the PR
