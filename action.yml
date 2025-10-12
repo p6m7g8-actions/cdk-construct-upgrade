@@ -43,7 +43,7 @@ runs:
     # -------------------------
     - name: Create Pull Request
       id: create_pr
-      uses: peter-evans/create-pull-request@v7.0.8
+      uses: peter-evans/create-pull-request@v6.1.0
       with:
         token: ${{ inputs.gh_token }}
         branch-token: ${{ inputs.gh_token }}
