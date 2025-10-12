@@ -39,6 +39,7 @@ runs:
       run: |
         git diff > diff.txt
         echo "diff<<EOF" >> "$GITHUB_ENV"
+        cat diff.txt
         cat diff.txt >> "$GITHUB_ENV"
         echo "EOF" >> "$GITHUB_ENV"
         rm -f diff.txt
