@@ -7,8 +7,6 @@ inputs:
     required: true
 runs:
   using: "composite"
-  env:
-    GH_TOKEN: ${{ inputs.gh_token }}
   steps:
     - name: Checkout code
       uses: actions/checkout@v5.0.0
