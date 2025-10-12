@@ -21,6 +21,11 @@ runs:
     - name: Export token for create-pull-request
       shell: bash
       run: echo "GITHUB_TOKEN=${{ inputs.gh_token }}" >> $GITHUB_ENV
+    - name: Prime git auth for PR
+      shell: bash
+      run: |
+        auth="$(printf "x-access-token:${{ inputs.gh_token }}" | base64 | tr -d '\n')"
+        git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth}"
     - name: Create Pull Request
       id: create_pr
       uses: peter-evans/create-pull-request@v7.0.8
@@ -28,6 +33,7 @@ runs:
         GITHUB_TOKEN: ${{ inputs.gh_token }}
       with:
         token: ${{ inputs.gh_token }}
+        branch-token: ${{ inputs.gh_token }}
         commit-message: |
           chore(deps): upgrade dependencies
         branch: github-actions/upgrade-main
