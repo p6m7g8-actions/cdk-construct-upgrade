@@ -1,42 +1,66 @@
 name: "P6 GHA: Upgrade Dependencies for a CDK Construct"
-description: "P6 GHA: Upgrade Dependencies for a CDK Construct"
+description: "Upgrades dependencies for a CDK Construct and opens a PR"
 author: "Philip M. Gollucci"
+
 inputs:
   gh_token:
-    description: "GitHub Token"
+    description: "GitHub Token (Classic PAT with repo scope)"
     required: true
+
 runs:
   using: "composite"
   steps:
-    - name: Checkout code
-      uses: actions/checkout@v5.0.0
+    # -------------------------
+    # Checkout the repository
+    # -------------------------
+    - name: Checkout main branch
+      uses: actions/checkout@v5
       with:
         fetch-depth: 0
         ref: main
+        persist-credentials: false  # we'll configure auth manually
+
+    # -------------------------
+    # Setup Node environment
+    # -------------------------
     - name: Setup Node
       uses: p6m7g8-actions/node-yarn-setup@main
+
+    # -------------------------
+    # Upgrade project dependencies
+    # -------------------------
     - name: Upgrade Dependencies
       shell: bash
-      run: yarn up '*'
-    - name: Export token for create-pull-request
-      shell: bash
-      run: echo "GITHUB_TOKEN=${{ inputs.gh_token }}" >> $GITHUB_ENV
-    - name: Prime git auth for PR
+      run: |
+        yarn up '*'
+        git diff > diff.txt
+        echo "diff<<EOF" >> "$GITHUB_ENV"
+        cat diff.txt >> "$GITHUB_ENV"
+        echo "EOF" >> "$GITHUB_ENV"
+
+    # -------------------------
+    # Prime Git authentication for PR (fixes remote prune)
+    # -------------------------
+    - name: Prime Git HTTPS credentials
       shell: bash
       run: |
         auth="$(printf "x-access-token:${{ inputs.gh_token }}" | base64 | tr -d '\n')"
         git config --local http.https://github.com/.extraheader "AUTHORIZATION: basic ${auth}"
+        git remote set-url origin "https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}.git"
+        git config user.name "github-actions"
+        git config user.email "github-actions@github.com"
+
+    # -------------------------
+    # Create or update the PR
+    # -------------------------
     - name: Create Pull Request
       id: create_pr
       uses: peter-evans/create-pull-request@v7.0.8
-      env:
-        GITHUB_TOKEN: ${{ inputs.gh_token }}
       with:
         token: ${{ inputs.gh_token }}
-        branch-token: ${{ inputs.gh_token }}
-        commit-message: |
-          chore(deps): upgrade dependencies
+        branch-token: ${{ inputs.gh_token }} # ensures git push/prune works
         branch: github-actions/upgrade-main
+        commit-message: "chore(deps): upgrade dependencies"
         title: "chore(deps): upgrade dependencies"
         labels: auto-merge
         body: |
