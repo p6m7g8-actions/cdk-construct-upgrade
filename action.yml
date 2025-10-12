@@ -46,7 +46,7 @@ runs:
       uses: peter-evans/create-pull-request@v6.1.0
       with:
         token: ${{ inputs.gh_token }}
-        branch-token: ${{ inputs.gh_token }}
+        git-token: ${{ inputs.gh_token }}
         branch: github-actions/upgrade-main
         commit-message: "chore(deps): upgrade dependencies"
         title: "chore(deps): upgrade dependencies"
