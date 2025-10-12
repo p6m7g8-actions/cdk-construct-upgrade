@@ -18,16 +18,12 @@ runs:
     - name: Upgrade Dependencies
       shell: bash
       run: yarn up '*'
-    - name: Configure Git identity
-      shell: bash
-      run: |
-        git config user.name "pgollucci"
-        git config user.email "pgollucci@p6m7g8.com"
     - name: Create Pull Request
       id: create_pr
       uses: peter-evans/create-pull-request@v7.0.8
       with:
         token: ${{ inputs.gh_token }}
+	prune: false
         commit-message: |
           chore(deps): upgrade dependencies
         branch: github-actions/upgrade-main
