@@ -66,7 +66,7 @@ runs:
 
         echo "Token prefix: ${GITHUB_TOKEN:0:4}"
 
-        git remote set-url origin "https://${{ github.actor }}:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+        git remote set-url origin "https://pgollucci:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git push --set-upstream origin github-actions/upgrade-main
 
         pr_url=$(gh pr create --title "chore(deps): upgrade dependencies" --body "This PR upgrades project dependencies." --head github-actions/upgrade-main --base main || gh pr view --json url --jq .url)
