@@ -39,7 +39,6 @@ runs:
       run: |
         git diff > diff.txt
         echo "diff<<EOF" >> "$GITHUB_ENV"
-        cat diff.txt
         cat diff.txt >> "$GITHUB_ENV"
         echo "EOF" >> "$GITHUB_ENV"
         rm -f diff.txt
@@ -50,6 +49,8 @@ runs:
     - name: Create Pull Request
       id: create_pr
       shell: bash
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         if [ -z "$diff" ]; then
           echo "No changes to commit"
@@ -62,6 +63,8 @@ runs:
         git checkout -b github-actions/upgrade-main
         git add .
         git commit -m "chore(deps): upgrade dependencies"
+
+        git remote set-url origin "https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
         git push --set-upstream origin github-actions/upgrade-main
 
         pr_url=$(gh pr create --title "chore(deps): upgrade dependencies" --body "This PR upgrades project dependencies." --head github-actions/upgrade-main --base main || gh pr view --json url --jq .url)
