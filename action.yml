@@ -10,64 +10,34 @@ inputs:
 runs:
   using: "composite"
   steps:
-    # -------------------------
-    # Checkout the repository
-    # -------------------------
     - name: Checkout main branch
       uses: actions/checkout@v5.0.0
       with:
         fetch-depth: 0
         ref: main
-        persist-credentials: false  # we'll configure auth manually
-
-    # -------------------------
-    # Setup Node environment
-    # -------------------------
+        persist-credentials: false
     - name: Setup Node
       uses: p6m7g8-actions/node-yarn-setup@main
-
-    # -------------------------
-    # Upgrade project dependencies
-    # -------------------------
     - name: Upgrade Dependencies
       shell: bash
       run: |
         yarn up '*'
-
     - name: Check for changes
       shell: bash
       run: |
-        git diff > diff.txt
-        echo "diff<<EOF" >> "$GITHUB_ENV"
-        cat diff.txt >> "$GITHUB_ENV"
-        echo "EOF" >> "$GITHUB_ENV"
-        rm -f diff.txt
-
-    # -------------------------
-    # Create or update the PR
-    # -------------------------
+        git diff
     - name: Create Pull Request
       id: create_pr
-      shell: bash
-      env:
-        GITHUB_TOKEN: ${{ inputs.gh_token }}
-      run: |
-        if [ -z "$diff" ]; then
-          echo "No changes to commit"
-          exit 0
-        fi
-
-        git config user.name "p6m7g8-automation"
-        git config user.email "p6m7g8-automation@p6m7g8.com"
-
-        git checkout -b github-actions/upgrade-main
-        git add .
-        git commit -m "chore(deps): upgrade dependencies"
-
-        echo "Token prefix: ${GITHUB_TOKEN:0:4}"
-
-        git remote set-url origin "https://p6m7g8-automation:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-        git push --set-upstream origin github-actions/upgrade-main
-
-        pr_url=$(gh pr create --title "chore(deps): upgrade dependencies" --body "This PR upgrades project dependencies." --head github-actions/upgrade-main --base main || gh pr view --json url --jq .url)
-        echo "pr_url=$pr_url" >> "$GITHUB_OUTPUT"
+      uses: peter-evans/create-pull-request@v7.0.8
+      with:
+        token: ${{ inputs.gh_token }}
+        commit-message: |
+          chore(deps): upgrade dependencies
+        branch: github-actions/upgrade-main
+        title: "chore(deps): upgrade dependencies"
+        labels: auto-merge
+        body: |
+          Upgrades project dependencies.
+        author: github-actions <github-actions@github.com>
+        committer: github-actions <github-actions@github.com>
+        signoff: true
