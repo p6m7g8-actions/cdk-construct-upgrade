@@ -11,7 +11,7 @@ runs:
   using: "composite"
   steps:
     - name: Checkout main branch
-      uses: actions/checkout@v5.0.0
+      uses: actions/checkout@v6.0.1
       with:
         fetch-depth: 0
         ref: main
