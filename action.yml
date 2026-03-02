@@ -4,8 +4,9 @@ author: "Philip M. Gollucci"
 
 inputs:
   gh_token:
-    description: "GitHub Token (Classic PAT with repo scope)"
-    required: true
+    description: "Fallback GitHub token (e.g., P6_A_GH_TOKEN)"
+    required: false
+    default: ""
 
 runs:
   using: "composite"
@@ -28,7 +29,8 @@ runs:
       id: token
       uses: p6m7g8-actions/gh-token-normalize@main
       with:
-        preferred-token: ${{ inputs.gh_token }}
+        preferred-token: ${{ github.token }}
+        fallback-token: ${{ inputs.gh_token }}
         default-token: ${{ github.token }}
     - name: Configure authenticated git remote
       shell: bash
@@ -39,12 +41,17 @@ runs:
       uses: peter-evans/create-pull-request@v8.1.0
       with:
         token: ${{ steps.token.outputs.value }}
+        branch-token: ${{ steps.token.outputs.value }}
         base: main
         commit-message: |
           chore(deps): upgrade dependencies
         branch: github-actions/upgrade-main
         title: "chore(deps): upgrade dependencies"
-        labels: auto-merge
+        labels: |
+          auto-approve
+          auto-merge
+        reviewers: |
+          p6m7g8-automation
         body: |
           Upgrades project dependencies.
         author: github-actions <github-actions@github.com>
