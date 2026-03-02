@@ -4,9 +4,8 @@ author: "Philip M. Gollucci"
 
 inputs:
   gh_token:
-    description: "Fallback GitHub token (e.g., P6_A_GH_TOKEN)"
-    required: false
-    default: ""
+    description: "GitHub token used for PR creation (P6_A_GH_TOKEN)"
+    required: true
 
 runs:
   using: "composite"
@@ -29,8 +28,8 @@ runs:
       id: token
       uses: p6m7g8-actions/gh-token-normalize@main
       with:
-        preferred-token: ${{ github.token }}
-        fallback-token: ${{ inputs.gh_token }}
+        preferred-token: ${{ inputs.gh_token }}
+        fallback-token: ${{ github.token }}
         default-token: ${{ github.token }}
     - name: Configure authenticated git remote
       shell: bash
