@@ -28,11 +28,24 @@ runs:
       id: token
       shell: bash
       run: |
-        token="${{ inputs.gh_token }}"
-        token="${token#https://x-access-token:}"
-        token="${token#x-access-token:}"
-        token="${token%@github.com*}"
-        echo "value=${token}" >> "$GITHUB_OUTPUT"
+        sanitize() {
+          local t="$1"
+          t="${t#https://x-access-token:}"
+          t="${t#x-access-token:}"
+          t="${t%@github.com*}"
+          echo "$t"
+        }
+
+        input_token="$(sanitize "${{ inputs.gh_token }}")"
+        default_token="$(sanitize "${{ github.token }}")"
+        repo_url="https://github.com/${{ github.repository }}.git"
+
+        # Prefer provided token, but gracefully fall back if it cannot auth.
+        if git ls-remote "https://x-access-token:${input_token}@${repo_url#https://}" HEAD >/dev/null 2>&1; then
+          echo "value=${input_token}" >> "$GITHUB_OUTPUT"
+        else
+          echo "value=${default_token}" >> "$GITHUB_OUTPUT"
+        fi
     - name: Configure authenticated git remote
       shell: bash
       run: |
