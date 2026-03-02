@@ -24,15 +24,24 @@ runs:
       shell: bash
       run: |
         git diff
+    - name: Normalize GitHub token
+      id: token
+      shell: bash
+      run: |
+        token="${{ inputs.gh_token }}"
+        token="${token#https://x-access-token:}"
+        token="${token#x-access-token:}"
+        token="${token%@github.com*}"
+        echo "value=${token}" >> "$GITHUB_OUTPUT"
     - name: Configure authenticated git remote
       shell: bash
       run: |
-        git remote set-url origin "https://x-access-token:${{ inputs.gh_token }}@github.com/${{ github.repository }}.git"
+        git remote set-url origin "https://x-access-token:${{ steps.token.outputs.value }}@github.com/${{ github.repository }}.git"
     - name: Create Pull Request
       id: create_pr
       uses: peter-evans/create-pull-request@v8.1.0
       with:
-        token: ${{ inputs.gh_token }}
+        token: ${{ steps.token.outputs.value }}
         base: main
         commit-message: |
           chore(deps): upgrade dependencies
