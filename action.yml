@@ -38,10 +38,14 @@ runs:
 
         input_token="$(sanitize "${{ inputs.gh_token }}")"
         default_token="$(sanitize "${{ github.token }}")"
-        repo_url="https://github.com/${{ github.repository }}.git"
+        auth_ok() {
+          local t="$1"
+          [[ -n "$t" ]] || return 1
+          curl -fsS -H "Authorization: Bearer ${t}" https://api.github.com/user >/dev/null
+        }
 
         # Prefer provided token, but gracefully fall back if it cannot auth.
-        if git ls-remote "https://x-access-token:${input_token}@${repo_url#https://}" HEAD >/dev/null 2>&1; then
+        if auth_ok "${input_token}"; then
           echo "value=${input_token}" >> "$GITHUB_OUTPUT"
         else
           echo "value=${default_token}" >> "$GITHUB_OUTPUT"
